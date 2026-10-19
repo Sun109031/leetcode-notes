@@ -1,0 +1,36 @@
+题目：给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。请注意 ，必须在不复制数组的情况下原地对数组进行操作。
+想法：遍历数组，遇到0则前移数组覆盖0元素同时记录0元素的个数，尾部填充对应个数的0。虽然满足了没有复制数组的要求但是时间复杂度高
+实现：
+class Solution {
+    public void moveZeroes(int[] nums) {
+        int count=0;
+        for(int i=0;i<nums.length-count;){
+            if(nums[i]==0){
+                count++;
+                for(int j=i;j<nums.length-1;j++){
+                    nums[j]=nums[j+1];
+                }
+            }
+            else{i++;}
+        }
+        for(int i=nums.length-count;i<nums.length;i++){
+            nums[i]=0;
+        }
+    
+    }
+}
+题解：使用快慢指针一次遍历，快指针查找到非零元素与慢指针交换元素同时慢指针加1（或者把快指针元素放到慢指针位置慢指针加1，尾部置零）
+实现：
+class Solution {
+    public void moveZeroes(int[] nums) {
+        int slow=0;
+        for(int fast=0;fast<nums.length;fast++){
+            if(nums[fast]!=0){
+                int temp=nums[fast];
+                nums[fast]=nums[slow];
+                nums[slow]=temp;
+                slow++;
+            }
+        } 
+    }
+}
