@@ -1,0 +1,23 @@
+题目：给定一个长度为 n 的整数数组 height 。有 n 条垂线，第 i 条线的两个端点是 (i, 0) 和 (i, height[i]) 。找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。返回容器可以储存的最大水量。
+想法：想到需要使用双指针，从两头遍历寻找符合条件的结果。但是对于怎么遍历，应该怎么移动指针移动哪个指针以及如何结束循环等问题存疑
+题解：从两边进行遍历一定会缩减容器宽度，所以我们在移动指针时就需要保证容器的高度有提升空间，所以不难得出，我们应该移动双指针中数据较短的一方确保高度有提升空间；当左右指针重合时结束循环
+实现；
+class Solution {
+    public int maxArea(int[] height) {
+         int right=height.length-1;
+         int left=0;
+         int max=0;
+         while(left<right){
+            int area=(right-left)*Math.min(height[right],height[left]);
+            max=Math.max(area,max);
+            if(height[right]<height[left]){right--;}
+            else{left++;}
+         }  
+         return max;
+    }
+}
+/*
+由于双指针的移动必定会缩减水面宽度，
+所以我们在考虑如何移动双指针的时候，
+必须舍弃高度较低的柱子，用以确保水面高度有提升空间
+*/
