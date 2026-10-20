@@ -1,0 +1,62 @@
+题目：给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。请你返回所有和为 0 且不重复的三元组。答案中不可以包含重复的三元组。
+思考：三层暴力循环查找三个数的和是否为零，但是感觉时间复杂度太大了没有尝试
+        联想到了之前的两数之和，尝试固定一个数值的相反数当作目标值把问题转换成两数之和问题,用map表存储数据的话会产生大量重复结果，想到set集合的特性，对三元组排序后采用set集合自动去重，又产生了新的问题，一个元素会被使用两次，把map集合的创建放在for循环内就可以解决
+      这次没有错误答案但是运行时间超时了
+                          class Solution {
+                public List<List<Integer>> threeSum(int[] nums) {
+                    List<List<Integer>> ans=new ArrayList<>();
+                   
+                    Set<List<Integer>> set=new HashSet<>();
+                    int len=nums.length;
+                   for(int i=0;i<len;i++){
+                    int target=-nums[i]; 
+                    Map<Integer,Integer> map=new HashMap<>();//map要在每次固定值之后新建，不然会存储之前被当为固定值的数据导致某个元素被重复使用
+                    //转换成两数和问题
+                    for(int j=i+1;j<len;j++){ 
+                       
+                        if(map.containsKey(target-nums[j])){
+                            //把这三个数封装成数组
+                            List<Integer> trip=Arrays.asList(nums[i],nums[j],nums[map.get(target-nums[j])]);
+                            //重复问题依然存在，可以使用hashset集合去重
+                            Collections.sort(trip);
+                            set.add(trip);
+                        }
+                        map.put(nums[j],j);
+                    }
+                   }
+                   ans.addAll(set);
+                    return ans;
+                }
+            
+            }
+题解：排序后遍历，固定一个数后，使用双指针进行查找符合条件的数据，但是一定要考虑重复条件并去除
+              class Solution {
+                  public List<List<Integer>> threeSum(int[] nums) {
+                      List<List<Integer>> ans=new ArrayList<>();
+                      Arrays.sort(nums);
+                      int len=nums.length;
+                      for(int i=0;i<nums.length-2;i++){                         //length-2是为了确保L和R可以正常工作
+                          if(nums[i]>0)break;                                  //如果nums[i]>0，数组是排序过的，后面所有的数据都是大于0的，没有继续运行的必要
+                          if(i>0&&nums[i]==nums[i-1])continue;                 //如果当前元素和前一个元素相同，三元组是一样的，停止当前循环
+                          if(nums[i]+nums[i+1]+nums[i+2]>0)break;              //当前循环最小的三个数大于0，肯定不存在符合条件的三元组
+                          if(nums[i]+nums[len-1]+nums[len-2]<0)continue;       //如果当前循环最大的两个数加nums[i]小于0，当前nums[i]一定不会符合条件，
+                          int L=i+1;
+                          int R=nums.length-1;
+                         
+                          while(L<R){
+                               int sum=nums[i]+nums[L]+nums[R];
+                          if(sum==0){
+                              ans.add(List.of(nums[i],nums[L],nums[R]));      //查找到符合条件的三元组存入数组
+                              while(L<R && nums[L]==nums[L+1]){L++;}          //在nums[i]不变，如果下一个数据和当前数据相同，三元组一定相同，所以跳过
+                              while(L<R && nums[R]==nums[R-1]){R--;}
+                              L++;                                            //nums[i]不变，若要找不重复的三元组，需要同时移动左右指针
+                              R--;}
+                          else if(sum<0)L++;                                  //排序之后的数学问题
+                          else if(sum>0)R--;
+                          }
+                      }
+                      return ans;
+                  }
+              } 
+
+      
