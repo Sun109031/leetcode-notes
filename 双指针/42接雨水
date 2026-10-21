@@ -1,0 +1,77 @@
+题目：给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+思考：画图思考了好长时间，想到了把这个问题拆解成多个小容器的储水问题，通过快慢指针寻找容器的左右壁，计算当前小容器的容量，这个还是比较简单的
+        第一个问题是，如果当前容器的左侧是整个数组的最大值，按照之前的逻辑找不到相匹配的右侧，我选择快慢指针都＋1跳过这个最大值，但是问题没有解决，后来想到可以通过最大值把这个数组划分为左右两部分来求解，
+        写完又遇到了新的问题，例如【2，0，2】、【0，2，0】等无法被解决，而且此时的代码已经泰国臃肿就放弃了，就不放到这里来了
+题解：第一个方法，每次只关注当前列，寻找当前列左右两侧的最高列，左右两侧最大值的最小值大于当前列就认为当前列是容器中的一部分，计算当前列能存储的量，时间复杂度是O(n²)
+              class Solution {
+              public int trap(int[] height) {
+                  int sum=0;
+                  for(int i=1;i<height.length-1;i++){
+                      int left_max=0;
+                      for(int m=i-1;m>=0;m--){
+                          if(height[m]>left_max)left_max=height[m];
+                      }
+                      int right_max=0;
+                      for(int n=i+1;n<height.length;n++){
+                          if(height[n]>right_max)right_max=height[n];
+                      }
+                      int min=Math.min(left_max,right_max);
+                      if(min>height[i])
+                      {sum=sum+(min-height[i]);}
+                  }
+                  return sum;
+              }
+          }
+    优化：对数据进行预处理，使得我们可以直接查找height[i]所对应的最大值，不需要多一层循环嵌套,使时间复杂度优化为O(n),但是有额外的空间开销，可以通过双指针进行优化
+                          class Solution {
+                  public int trap(int[] height) {
+                      int sum=0;
+                      int len=height.length;                  //上一个解法在找左右 最大值的时候需要每次都重复查找一边，这次先建立两个数组对其进行预处理
+                      int [] l_m=new int [len];
+                      l_m[0]=height[0];
+                                                              //左侧最大值初始化，然后比较当前的height值和之前的左侧最大值l_m[i],确定好对于每一个height[i]都有一个最大值l_m[i]
+                                                              //这让在计算每一格储水量的时候就不用再次循环遍历查找最大值了
+                      for(int i=1;i<len;++i){
+                          l_m[i]=Math.max(l_m[i-1],height[i]);
+                      }
+              
+                      int [] r_m=new int [len];
+                      r_m[len-1]=height[len-1];
+                      for(int i=len-2;i>=0;--i){
+                          r_m[i]=Math.max(r_m[i+1],height[i]);
+                      }
+                      for(int i=1;i<len-1;i++){
+                          sum=sum+(Math.min(l_m[i],r_m[i])-height[i]);
+                      }
+                      return sum;
+                  }
+              }
+    优化：使用双指针向中间逼近，较矮的一侧会漏水，优先移动这一侧的指针，对于这个写法我看视频能理解思路但是不太理解这个实现，后来想了快一个小时才有点相通，
+          leftMax和rightMax表示的是两个指针[0,当前位格]的最大值（不是[0,当前位格-1]的最大值，这样才能解释为什么可以直接做差求水量），
+          while循环中if语句的算式的意思是，当前位格在左右构成的容器中的存水量，如果当前位格更新了最值，当前位格存不存水（存水量=0），如果当前位格没有更新最值，存水量就是差值.
+          if语句中的变量指代的是当前位格的值和当前位格左侧（或右侧）的最大值。计算当前位格的存水情况之后才移动指针，同时在下一循环第一时间更新最值问题。先结算后位移
+                      class Solution {
+                      public int trap(int[] height) {
+                          int sum=0;
+                          int len=height.length;
+                          int left=0,right=len-1;
+                          int leftMax=0,rightMax=0;                                                         
+                          while(left<right){
+                             leftMax=Math.max(leftMax,height[left]);             //记住[0.left]的最大值，用来后续对比当前height[left]的值
+                             rightMax=Math.max(rightMax,height[right]);
+                              if(leftMax<rightMax){                              //通过比较两个最值确定我们当下要处理左侧位格，处理方法是对比左右桶壁较矮的一方的高度和当前位格的高度来确定此位格存水量，
+                                  sum+=leftMax-height[left];                     //如果hl是lm，差值为0不存水，如果hl不是lm，当前位格就是lm和rm构成的容器的一部分，差值就是存水量
+                                  left++;
+                              }
+                              else
+                              {
+                                  sum+=rightMax-height[right];
+                                   right--;   
+                              }
+                          }
+                          return sum;
+                      }
+                  } 
+    
+              
+       
